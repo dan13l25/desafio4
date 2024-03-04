@@ -1,10 +1,16 @@
 <div>
-  <h1>{{mensaje}}</h1>
-  <input id="text">
-  <p id="message">Este es un párrafo de ejemplo</p>
+   <h1>{{mensaje}}</h1>
+   <input id="productInput">
+   <p id="message">Lista creada </p>
 </div>
 
 <ul id="productList">
+    {{#each products}}
+        <li>
+            <span>{{this.name}}</span>
+            <button class="deleteButton" data-productname="{{this.name}}">Eliminar</button>
+        </li>
+    {{/each}}
 </ul>
 
 <script src="/socket.io/socket.io.js"></script>

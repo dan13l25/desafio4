@@ -13,17 +13,24 @@ app.set('views', `${__dirname}/views`)
 app.set('view engine', 'handlebars')
 app.engine('handlebars', handlebars.engine())
 
-app.get("/products", (req, res) => {
-  // Aquí se debe obtener la lista de productos desde la base de datos
-  const products = [
-    { id: 1, name: "Producto 1" },
-    { id: 2, name: "Producto 2" },
-    { id: 3, name: "Producto 3" },
-  ];
+app.get("/", (req,res)=>{
+    const datos = {
+        mensaje: "Hola desde el servidor",
+        otroDato: "Información adicional"
+    }
 
-  // Se envía la lista de productos como respuesta
-  res.json(products);
-});
+    res.render("realtimeproducts", datos)
+})
+
+app.get("/products", (req, res) => {
+    const products = [
+        { name: "Producto 1" },
+        { name: "Producto 2" },
+    ]
+
+    res.json(products);
+})
+
 let server = app.listen(port, () => {
     console.log("Servidor funcionando en http://localhost:" + port)
 })
@@ -31,9 +38,9 @@ let server = app.listen(port, () => {
 const io = new Server (server)  
 
 io.on('connection', socket => {
-    console.log("Conectado");
-    
-    socket.on("message", data => {
-        io.emit('log', data);
+    console.log("Conectado")
+
+    socket.on("newProduct", productName => {
+        io.emit('newProduct', productName)
     })
 })
