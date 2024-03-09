@@ -1,19 +1,53 @@
-export class ProductController {
-    constructor(io) {
-        this.io = io;
-    }
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-    addProduct(req, res) {
-        const { title, description, price, thumbnail, code, stock, status = true, category } = req.body;
-        const newProduct = { title, description, price, thumbnail, code, stock, status, category };
-        this.io.emit('newProduct', newProduct);
-        res.json(newProduct);
-    }
+export default class ProductController {
+  constructor(io) {
+    this.io = io;
+  }
 
-    // Export the ProductController instance
-    static controllerInstance;
+  async readProducts() {
+    const productsJsonPath = fileURLToPath(new URL('../data/products.json', import.meta.url));
+    const rawData = await fs.promises.readFile(productsJsonPath);
+    const products = JSON.parse(rawData);
+    return products;
+  }
 
-    static init(io) {
-        this.controllerInstance = new ProductController(io);
-    }
+  async writeProducts(products) {
+    const productsJsonPath = fileURLToPath(new URL('../data/products.json', import.meta.url));
+    await fs.promises.writeFile(productsJsonPath, JSON.stringify(products, null, 2));
+  }
+
+  async addProduct(req, res) {
+    const products = await this.readProducts();
+
+    const newProduct = {
+      id: products.length + 1,
+      title: req.body.title,
+      description: req.body.description,
+      price: req.body.price,
+      thumbnail: req.body.thumbnail,
+      code: req.body.code,
+      stock: req.body.stock,
+      status: req.body.status,
+      category: req.body.category,
+    };
+
+    products.push(newProduct);
+    await this.writeProducts(products);
+
+    this.io.emit('newProduct', newProduct);
+
+    res.json(newProduct);
+  }
+
+  static async init(io) {
+    const controller = new ProductController(io);
+    const productsJsonPath = fileURLToPath(new URL('../data/products.json', import.meta.url));
+    const rawData = await fs.promises.readFile(productsJsonPath);
+    const products = JSON.parse(rawData);
+    controller.products = products;
+    return controller;
+  }
 }

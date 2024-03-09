@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "title": "batidora",
+    "description": "tiene 3 velocidades",
+    "price": 53000,
+    "thumbnail": "url_de_la_imagen",
+    "code": "ABC123",
+    "stock": 10,
+    "status": true,
+    "category": "Categoría de prueba"
+  }
+]

@@ -2,8 +2,8 @@ import express from "express"
 import __dirname from "./utils.js"
 import handlebars from "express-handlebars"
 import { Server } from "socket.io"
-import { productRouter } from "./routes/product.router.js"
-import { ProductController } from "./controllers/productControllers.js"
+import { Router } from "express";
+import productController from "./controllers/productControllers.js"
 
 const app = express()
 const port = 8080
@@ -13,8 +13,11 @@ const server = app.listen(port, () => {
 
 const io = new Server(server)
 
-const productController = new ProductController(io);
-const productRouterInstance = productRouter(io, productController);
+// Call the ProductController.init method
+let productControllerInstance;
+productController.init(io).then((instance) => {
+  productControllerInstance = instance;
+});
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -22,7 +25,15 @@ app.use(express.static(__dirname + '/public'))
 app.set('views', `${__dirname}/views`)  
 app.set('view engine', 'handlebars')
 app.engine('handlebars', handlebars.engine())
-app.use("/api/products", productRouterInstance);
+const productApiRouter = Router();
+productApiRouter.use("/", (req, res, next) => {
+  if (productControllerInstance) {
+    productControllerInstance.addProduct(req, res, next);
+  } else {
+    next(new Error("productControllerInstance is not defined yet"));
+  }
+});
+app.use("/api/products", productApiRouter);
 
 app.get("/", (req,res)=>{
     const datos = {
