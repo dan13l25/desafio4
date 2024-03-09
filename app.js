@@ -14,9 +14,7 @@ const server = app.listen(port, () => {
 const io = new Server(server)
 
 const productController = new ProductController(io);
-const productRouterInstance = productRouter(productController);
-
-ProductController.init(io);
+const productRouterInstance = productRouter(io, productController);
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))

@@ -17,6 +17,3 @@ export class ProductController {
         this.controllerInstance = new ProductController(io);
     }
 }
-
-// Initialize the controller in product.router.js
-ProductController.init(io);
